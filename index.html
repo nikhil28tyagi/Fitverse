@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fitverse Quantum - Premium AI Fitness Suite</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+    
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/control_utils/control_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/drawing_utils/drawing_utils.js" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <div class="app-background-glow"></div>
+    <div class="app-container">
+        
+        <header class="hud-header">
+            <div class="brand-block">
+                <div class="logo-mark">🗲</div>
+                <div>
+                    <h1>FITVERSE <span class="text-gradient-cyan">QUANTUM</span></h1>
+                    <p class="brand-sub">NEXT-GEN BIOMETRIC PERFORMANCE SUITE</p>
+                </div>
+            </div>
+            <div class="system-status-badge">
+                <span class="pulse-dot"></span> FEEDBACK MATRIX ACTIVE
+            </div>
+            <div id="system-time" class="system-clock">00:00:00 UTC</div>
+        </header>
+
+        <nav class="module-navigation">
+            <button id="tab-vision" class="nav-tab active" onclick="switchModule('vision')">
+                <span class="tab-icon">☉</span> VISION TRACKER
+            </button>
+            <button id="tab-nutrition" class="nav-tab" onclick="switchModule('nutrition')">
+                <span class="tab-icon">🗲</span> NUTRITION ENGINE
+            </button>
+            <button id="tab-routines" class="nav-tab" onclick="switchModule('routines')">
+                <span class="tab-icon">📋</span> WORKOUT REGISTRY
+            </button>
+            <button id="tab-analytics" class="nav-tab" onclick="switchModule('analytics')">
+                <span class="tab-icon">📊</span> INSIGHTS HUB
+            </button>
+            <button id="tab-config" class="nav-tab" onclick="switchModule('config')">
+                <span class="tab-icon">⚙</span> SYSTEM CONFIG
+            </button>
+        </nav>
+
+        <div id="module-vision-container" class="main-layout module-visible">
+            <div class="video-box-wrapper">
+                <div class="video-box">
+                    <div class="scanline"></div>
+                    <video id="webcam" autoplay playsinline muted></video>
+                    <canvas id="output-canvas"></canvas>
+                    <div class="hud-corner top-left"></div>
+                    <div class="hud-corner top-right"></div>
+                    <div class="hud-corner bottom-left"></div>
+                    <div class="hud-corner bottom-right"></div>
+                </div>
+            </div>
+
+            <div class="dashboard">
+                <div class="metric-card card-cyan">
+                    <h3>TARGET ROUTINE SELECTION</h3>
+                    <div class="btn-group">
+                        <button id="btn-curl" class="hud-btn active" onclick="setExercise('bicep_curl')">BICEP CURL</button>
+                        <button id="btn-squat" class="hud-btn" onclick="setExercise('squat')">SQUAT LAYER</button>
+                    </div>
+                </div>
+
+                <div class="metric-card card-cyan text-center">
+                    <h3>REPETITION STREAM</h3>
+                    <div class="progress-container">
+                        <svg class="progress-ring" width="150" height="150">
+                            <circle class="progress-ring__background" stroke="rgba(255,255,255,0.03)" stroke-width="10" fill="transparent" r="62" cx="75" cy="75"/>
+                            <circle id="rep-progress-bar" class="progress-ring__bar stroke-cyan" stroke-width="10" stroke-linecap="round" fill="transparent" r="62" cx="75" cy="75"/>
+                        </svg>
+                        <div id="rep-count" class="counter text-cyan">0</div>
+                    </div>
+                </div>
+
+                <div class="metric-card card-coral text-center">
+                    <h3>LIVE STRUCTURAL GEOMETRY</h3>
+                    <div id="joint-angle" class="angle-display text-coral">0°</div>
+                    <div id="angle-label" class="sub-label">ELBOW JOINTS</div>
+                </div>
+
+                <div id="feedback-card" class="metric-card feedback-card status-good-border">
+                    <h3>COACH LINK INTELLIGENCE</h3>
+                    <div id="feedback-text" class="status-good">CONNECTING SYSTEM STREAM...</div>
+                </div>
+            </div>
+        </div>
+
+        <div id="module-nutrition-container" class="main-layout module-hidden">
+            <div class="metric-card card-green">
+                <h3>METABOLIC DATA INGESTION</h3>
+                <form id="food-form" onsubmit="logFoodItem(event)" class="hud-form">
+                    <div class="input-container">
+                        <input type="text" id="food-name" placeholder="E.G., GRILLED CHICKEN / PANEER" required class="hud-input input-green">
+                    </div>
+                    <div class="input-container">
+                        <input type="number" id="food-calories" placeholder="ENERGY DATA (KCAL)" required class="hud-input input-green">
+                    </div>
+                    <button type="submit" class="hud-btn btn-green active btn-full">LOG METABOLIC UNITS</button>
+                </form>
+                
+                <div class="log-table-wrapper">
+                    <h4 class="text-green">DAILY CONSUMPTION REGISTRY</h4>
+                    <ul id="food-log-list" class="hud-list">
+                        </ul>
+                </div>
+            </div>
+
+            <div class="dashboard">
+                <div class="metric-card card-green text-center">
+                    <h3>TOTAL ENERGY INTAKE</h3>
+                    <div id="total-calories" class="counter text-green">0</div>
+                    <div class="sub-label">KCAL CONSUMED</div>
+                </div>
+                <div class="metric-card card-green">
+                    <h3>HEALTHIFYME INSPIRED DIET METRICS</h3>
+                    <div class="diet-chart-summary">
+                        <p><span class="badge-dot bg-green"></span> <strong>08:30 AM:</strong> Sprouted Moong + Whey Protein (350 kcal)</p>
+                        <p><span class="badge-dot bg-green"></span> <strong>01:30 PM:</strong> Dal Tadka + Sabzi + 2 Roti (500 kcal)</p>
+                        <p><span class="badge-dot bg-green"></span> <strong>05:30 PM:</strong> Roasted Chana + Green Tea (150 kcal)</p>
+                        <p><span class="badge-dot bg-green"></span> <strong>08:30 PM:</strong> Soya Chunks/Fish Stir Fry + Salad (400 kcal)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="module-routines-container" class="main-layout module-hidden">
+            <div class="metric-card card-purple">
+                <h3>DYNAMIC TARGET CONFIGURATION</h3>
+                <p class="section-desc">Select your system target profile array:</p>
+                <div class="btn-group strength-group">
+                    <button id="plan-fatloss" class="hud-btn btn-purple active" onclick="loadPersonalizedPlan('fat_loss')">FAT LOSS MATRIX</button>
+                    <button id="plan-muscle" class="hud-btn btn-purple" onclick="loadPersonalizedPlan('muscle_gain')">MUSCLE HYPERTROPHY</button>
+                </div>
+            </div>
+
+            <div class="dashboard">
+                <div class="metric-card card-purple">
+                    <h3>TARGET WORKOUT SCHEDULING</h3>
+                    <div id="routine-plan-content" class="diet-chart-summary">
+                        </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="module-analytics-container" class="main-layout module-hidden">
+            <div class="metric-card card-orange">
+                <h3>SESSION PERFORMANCE DATA</h3>
+                <div class="analytics-grid">
+                    <div class="stat-box">
+                        <span class="stat-val text-orange" id="analytics-total-reps">0</span>
+                        <span class="sub-label">TOTAL WORKOUT REPS</span>
+                    </div>
+                    <div class="stat-box">
+                        <span class="stat-val text-green" id="analytics-calories">0 kcal</span>
+                        <span class="sub-label">LOGGED METABOLIC UNITS</span>
+                    </div>
+                </div>
+            </div>
+            <div class="dashboard">
+                <div class="metric-card card-orange">
+                    <h3>AI COACH PREDICTIVE MATRIX</h3>
+                    <div class="diet-chart-summary">
+                        <p><span class="badge-dot bg-orange"></span> <strong>ACCURACY RATING:</strong> <span class="text-cyan">94.8% CALIBRATED</span></p>
+                        <p><span class="badge-dot bg-orange"></span> <strong>FATIGUE BOUNDARY:</strong> EXCELLENT // STABLE VITALS</p>
+                        <p><span class="badge-dot bg-orange"></span> <strong>INSIGHT:</strong> Motion velocity indicates optimal neural recruitment. Keep consistency.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="module-config-container" class="main-layout module-hidden">
+            <div class="metric-card card-magenta">
+                <h3>OPERATOR PROFILE SYSTEM CONFIG</h3>
+                <form id="profile-form" onsubmit="saveProfileConfig(event)" class="hud-form">
+                    <input type="text" id="user-name-input" placeholder="OPERATOR IDENTITY (E.G., DHRUV TYAGI)" class="hud-input input-magenta" required>
+                    <input type="number" id="user-weight-input" placeholder="MASS INDEX (KG)" class="hud-input input-magenta" required>
+                    <button type="submit" class="hud-btn btn-magenta active btn-full">SAVE TO MANIFEST</button>
+                </form>
+            </div>
+            <div class="dashboard">
+                <div class="metric-card card-magenta">
+                    <h3>ACTIVE USER PROFILE PROFILE</h3>
+                    <div class="diet-chart-summary" id="profile-display-data">
+                        <p><strong>OPERATOR:</strong> SECURITY LINK UNASSIGNED</p>
+                        <p><strong>MASS UNIT:</strong> 00.00 KG</p>
+                        <p><strong>AUDIO ENGINE:</strong> TEXT-TO-SPEECH ENABLED</p>
+                        <p><strong>VISION TRACKER:</strong> MEDIAPIPE MODEL V1</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
